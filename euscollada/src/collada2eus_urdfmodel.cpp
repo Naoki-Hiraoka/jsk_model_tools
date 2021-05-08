@@ -591,7 +591,7 @@ void ModelEuslisp::printMesh(const aiScene* scene, const aiNode* node, const Vec
 bool limb_order_asc(const pair<string, size_t>& left, const pair<string, size_t>& right) { return left.second < right.second; }
 void ModelEuslisp::readYaml (string &config_file) {
   // read yaml
-  string limb_candidates[] = {"torso", "larm", "rarm", "lleg", "rleg", "head", "rhand", "lhand"}; // candidates of limb names
+  string limb_candidates[] = {"torso", "larm", "rarm", "lleg", "rleg", "head"}; // candidates of limb names
 
   vector<pair<string, size_t> > limb_order;
 #ifndef USE_CURRENT_YAML
@@ -1143,16 +1143,35 @@ void ModelEuslisp::printEndCoords () {
   } else {
     fprintf(fp, "     (setq links (list %s", robot->root_link_->name.c_str());
   }
+  std::vector<std::string > links;
   BOOST_FOREACH(link_joint_pair& limb, limbs) {
     string limb_name = limb.first;
     vector<string> link_names = limb.second.first;
     if (add_link_suffix) {
       for (unsigned int i = 0; i < link_names.size(); i++) {
         fprintf(fp, " %s_lk", link_names[i].c_str());
+        links.push_back(link_names[i]);
       }
     } else {
       for (unsigned int i = 0; i < link_names.size(); i++) {
         fprintf(fp, " %s", link_names[i].c_str());
+        links.push_back(link_names[i]);
+      }
+    }
+  }
+#if URDFDOM_1_0_0_API
+  for (map<string, LinkSharedPtr>::iterator link = robot->links_.begin();
+#else
+  for (map<string, boost::shared_ptr<Link> >::iterator link = robot->links_.begin();
+#endif
+       link != robot->links_.end(); link++) {
+    if (std::find(links.begin(), links.end(), link->second->name) == links.end()) {
+      if (add_link_suffix) {
+        fprintf(fp, " %s_lk", link->second->name.c_str());
+        links.push_back(link->second->name.c_str());
+      } else {
+        fprintf(fp, " %s", link->second->name.c_str());
+        links.push_back(link->second->name.c_str());
       }
     }
   }
@@ -1161,15 +1180,34 @@ void ModelEuslisp::printEndCoords () {
 
   fprintf(fp, "     ;; joint-list\n");
   fprintf(fp, "     (setq joint-list (list");
+  std::vector<std::string > joint_list;
   BOOST_FOREACH(link_joint_pair& limb, limbs) {
     vector<string> joint_names = limb.second.second;
     if(add_joint_suffix) {
       for (unsigned int i = 0; i < joint_names.size(); i++) {
         fprintf(fp, " %s_jt", joint_names[i].c_str());
+        joint_list.push_back(joint_names[i]);
       }
     } else {
       for (unsigned int i = 0; i < joint_names.size(); i++) {
         fprintf(fp, " %s", joint_names[i].c_str());
+        joint_list.push_back(joint_names[i]);
+      }
+    }
+  }
+#if URDFDOM_1_0_0_API
+  for (map<string, JointSharedPtr>::iterator joint = robot->joints_.begin();
+#else
+  for (map<string, boost::shared_ptr<Joint> >::iterator joint = robot->joints_.begin();
+#endif
+       joint != robot->joints_.end(); joint++) {
+    if (std::find(joint_list.begin(),joint_list.end(),joint->second->name) == joint_list.end()) {
+      if (add_joint_suffix) {
+        fprintf(fp, " %s_jt", joint->second->name.c_str());
+        joint_list.push_back(joint->second->name.c_str());
+      } else {
+        fprintf(fp, " %s", joint->second->name.c_str());
+        joint_list.push_back(joint->second->name.c_str());
       }
     }
   }
