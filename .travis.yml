@@ -5,19 +5,19 @@ notifications:
     on_failure: always
   slack: jsk-robotics:Av7tc8wj3IWkLYvlTzHE7x2g
 sudo: required
-dist: trusty
+dist: bionic
 services:
   - docker
 env:
   global:
     - USE_DOCKER=true
   matrix:
-    - ROS_DISTRO=indigo ROSWS=wstool BUILDER=catkin USE_DEB=true
-    - ROS_DISTRO=indigo ROSWS=wstool BUILDER=catkin USE_DEB=false
-    - ROS_DISTRO=kinetic   ROSWS=wstool BUILDER=catkin USE_DEB=true
-    - ROS_DISTRO=kinetic   ROSWS=wstool BUILDER=catkin USE_DEB=false
-    - ROS_DISTRO=melodic   ROSWS=wstool BUILDER=catkin USE_DEB=true
-    - ROS_DISTRO=melodic   ROSWS=wstool BUILDER=catkin USE_DEB=false
+    - ROS_DISTRO=indigo  DOCKER_IMAGE=jskrobotics/ros-ubuntu:14.04 ROSWS=wstool BUILDER=catkin USE_DEB=true
+    - ROS_DISTRO=indigo  DOCKER_IMAGE=jskrobotics/ros-ubuntu:14.04 ROSWS=wstool BUILDER=catkin USE_DEB=false
+    - ROS_DISTRO=kinetic DOCKER_IMAGE=jskrobotics/ros-ubuntu:16.04 ROSWS=wstool BUILDER=catkin USE_DEB=true
+    - ROS_DISTRO=kinetic DOCKER_IMAGE=jskrobotics/ros-ubuntu:16.04 ROSWS=wstool BUILDER=catkin USE_DEB=false
+    - ROS_DISTRO=melodic DOCKER_IMAGE=jskrobotics/ros-ubuntu:18.04 ROSWS=wstool BUILDER=catkin USE_DEB=true
+    - ROS_DISTRO=melodic DOCKER_IMAGE=jskrobotics/ros-ubuntu:18.04 ROSWS=wstool BUILDER=catkin USE_DEB=false
 matrix:
   allow_failures:
     - env: ROS_DISTRO=indigo ROSWS=wstool BUILDER=catkin USE_DEB=false
